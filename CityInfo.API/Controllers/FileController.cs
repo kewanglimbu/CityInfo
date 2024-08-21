@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace CityInfo.API.Controllers
@@ -30,6 +31,29 @@ namespace CityInfo.API.Controllers
             }
             var bytes = System.IO.File.ReadAllBytes(filePath);
             return File(bytes, contentType, Path.GetFileName(filePath));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UploadFile(IFormFile file)
+        {
+            if (file.Length == 0 || file.Length> 20000000 || file.ContentType!= "application/pdf" )
+            {
+                return BadRequest("No file Content or invalid file");
+            }
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), $"Uploaded_file_{ Guid.NewGuid() }.pdf");
+            
+            //if (!Directory.Exists(path))
+            //{
+            //    Directory.CreateDirectory(path);
+            //}
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Ok("Successfully file uploaded!");
         }
 
     }
