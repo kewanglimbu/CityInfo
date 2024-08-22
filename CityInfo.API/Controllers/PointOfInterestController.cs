@@ -8,15 +8,35 @@ namespace CityInfo.API.Controllers
     [Route("api/cities/{cityId}/pointofinterest")]
     public class PointOfInterestController : Controller
     {
+        private ILogger<PointOfInterestController> _logger;
+
+        public PointOfInterestController(ILogger<PointOfInterestController> logger)
+        {
+            _logger = logger?? throw new ArgumentNullException(nameof(logger));
+        }
+
         [HttpGet]
         public ActionResult<IEnumerable<PointOfInterestDto>> GetPointOfInterest(int cityId)
         {
-            var cities = CityDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-            if (cities == null)
+            //Throw exception just for testing purpose
+            throw new Exception("error ocuur");
+
+            try
             {
-                return NotFound();
+                var cities = CityDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                if (cities == null)
+                {
+                    _logger.LogInformation($"City with Id {cityId} was not found.");
+                    return NotFound();
+                }
+
+                return Ok(cities.PointOfInterest);
             }
-            return Ok(cities.PointOfInterest);
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"Exception occurred while retrieving points of interest for city with Id {cityId}.", ex);
+                return StatusCode(500, "An error occurred while processing your request. ");
+            }
         }
 
         [HttpGet("{pointOfInterestId}", Name = "GetPointOfInterest")]
