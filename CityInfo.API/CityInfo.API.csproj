@@ -22,4 +22,12 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\AspNetCoreWebAPI\CityInfo\CityInfo.API\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\AspNetCoreWebAPI\CityInfo\CityInfo.API\.editorconfig" />
+  </ItemGroup>
+
 </Project>
