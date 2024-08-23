@@ -1,4 +1,5 @@
 ﻿using CityInfo.API.Models;
+using CityInfo.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,17 +10,19 @@ namespace CityInfo.API.Controllers
     public class PointOfInterestController : Controller
     {
         private ILogger<PointOfInterestController> _logger;
+        private readonly IMailService _mailService;
 
-        public PointOfInterestController(ILogger<PointOfInterestController> logger)
+        public PointOfInterestController(ILogger<PointOfInterestController> logger,IMailService mailService)
         {
             _logger = logger?? throw new ArgumentNullException(nameof(logger));
+            _mailService = mailService?? throw new ArgumentNullException(nameof(mailService));
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<PointOfInterestDto>> GetPointOfInterest(int cityId)
         {
             //Throw exception just for testing purpose
-            throw new Exception("error ocuur");
+            //throw new Exception("error ocuur");
 
             try
             {
@@ -161,21 +164,32 @@ namespace CityInfo.API.Controllers
         [HttpDelete("{pointOfInterestId}")]
         public ActionResult DeletePointOfInterest(int cityId, int pointOfInterestId)
         {
-            var city = CityDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-            if(city == null)
+            try
             {
-                return NotFound();
-            }
+                var city = CityDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                if (city == null)
+                {
+                    _logger.LogInformation($"City with Id {cityId} was not found.");
+                    return NotFound();
+                }
 
-            var pointOfInterestInCity = city.PointOfInterest.FirstOrDefault( p=> p.Id == pointOfInterestId);
-            if (pointOfInterestInCity == null)
+                var pointOfInterestInCity = city.PointOfInterest.FirstOrDefault(p => p.Id == pointOfInterestId);
+                if (pointOfInterestInCity == null)
+                {
+                    _logger.LogInformation($"PointOfInterest with Id {pointOfInterestId} was not found.");
+                    return NotFound();
+                }
+
+                city.PointOfInterest.Remove(pointOfInterestInCity);
+                _mailService.Send("PointOfInterest Deleted",$"PointOfInterest '{pointOfInterestInCity.Name}' with Id {pointOfInterestInCity.Id} is deleted.");
+                
+                return NoContent();
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                _logger.LogCritical($"Exception occurred while retrieving points of interest for city with Id {cityId}.", ex);
+                return StatusCode(500, "An error occurred while processing your request. ");
             }
-
-            city.PointOfInterest.Remove(pointOfInterestInCity);
-            return NoContent();
         }
-
     }
 }
