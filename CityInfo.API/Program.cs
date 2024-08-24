@@ -1,6 +1,7 @@
-using CityInfo.API;
+using CityInfo.API.DbContexts;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -15,16 +16,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllers( options =>
+builder.Services.AddControllers(options =>
 {
-    options.ReturnHttpNotAcceptable= true;
+    options.ReturnHttpNotAcceptable = true;
 }).AddNewtonsoftJson()
   .AddXmlDataContractSerializerFormatters();
 builder.Services.AddProblemDetails();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<CityDataStore>();
+builder.Services.AddDbContext<CityInfoDbContext>(dbContextoptions => dbContextoptions.UseSqlite("Data Source= CityInfoDB.db"));
 builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
 #if DEBUG
 builder.Services.AddTransient<IMailService, LocalMailService>();
@@ -34,7 +35,7 @@ builder.Services.AddTransient<IMailService, CloudMailService>();
 
 var app = builder.Build();
 
-if(!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler();
 }
