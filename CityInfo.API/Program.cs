@@ -25,13 +25,15 @@ builder.Services.AddProblemDetails();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<CityInfoDbContext>(dbContextoptions => dbContextoptions.UseSqlite("Data Source= CityInfoDB.db"));
+builder.Services.AddDbContext<CityInfoDbContext>(dbContextoptions => dbContextoptions.UseSqlite(builder.Configuration.GetConnectionString("CityInfoCS")));
 builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+builder.Services.AddScoped<ICityInfoRepository, CityInfoRepository>();
 #if DEBUG
 builder.Services.AddTransient<IMailService, LocalMailService>();
 #else
 builder.Services.AddTransient<IMailService, CloudMailService>();
 #endif
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
