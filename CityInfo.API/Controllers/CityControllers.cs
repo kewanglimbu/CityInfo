@@ -36,6 +36,28 @@ namespace CityInfo.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("filterbyname")]
+        public async Task<ActionResult<IEnumerable<CityWithoutPointOfInterestDto>>> GetCitiesByFiltering(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            var filerCities = await _cityInfoRepository.GetCitiesByFilteringAsync(name);
+            var result = _mapper.Map<IEnumerable<CityWithoutPointOfInterestDto>>(filerCities);
+            return Ok(filerCities);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<CityWithoutPointOfInterestDto>>> SearchForQueryInCity(string? name, string? searchQuery)
+        {
+            //if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(searchQuery))
+            //    return BadRequest("At least one search parameter (name or searchQuery) must be provided.");
+
+            var filerCities = await _cityInfoRepository.SearchQueryForCitiesAsync(name, searchQuery);
+            var result = _mapper.Map<IEnumerable<CityWithoutPointOfInterestDto>>(filerCities);
+            return Ok(filerCities);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCity(int id, bool includePointOfInterest = false)
         {
