@@ -19,7 +19,8 @@ namespace CityInfo.API.DbContexts
             modelBuilder.Entity<City>().HasData(
                 new City("Gothgaun") { Id = 1, Description = "It is small peaceful semi urban area located in the morang district." },
                 new City("Nakhipot") { Id = 2, Description = "It is the beautiful place located in the satdobato, lalitpur." },
-                new City("Itahari") { Id = 3, Description = "It is city located in the Sunsari district and important business hub of eastern Nepal." }
+                new City("Itahari") { Id = 3, Description = "It is city located in the Sunsari district and important business hub of eastern Nepal." },
+                new City("Dharan") { Id = 4, Description = "It is city located in the Sunsari district and important business hub of eastern Nepal." }
                 );
 
             modelBuilder.Entity<PointOfInterest>().HasData(
