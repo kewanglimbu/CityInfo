@@ -11,6 +11,7 @@ namespace CityInfo.API.Controllers
     {
         private readonly ICityInfoRepository _cityInfoRepository;
         private readonly IMapper _mapper;
+        const int MAX_CITIES_PAGESIZE = 20;
 
         public CityControllers(ICityInfoRepository cityInfoRepository, IMapper mapper)
         {
@@ -48,12 +49,16 @@ namespace CityInfo.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<CityWithoutPointOfInterestDto>>> SearchForQueryInCity(string? name, string? searchQuery)
+        public async Task<ActionResult<IEnumerable<CityWithoutPointOfInterestDto>>> SearchForQueryInCity(string? name, string? searchQuery, int pageNumber = 1, int pageSize = 10)
         {
             //if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(searchQuery))
             //    return BadRequest("At least one search parameter (name or searchQuery) must be provided.");
 
-            var filerCities = await _cityInfoRepository.SearchQueryForCitiesAsync(name, searchQuery);
+            if(pageSize > MAX_CITIES_PAGESIZE)
+            {
+                pageSize = MAX_CITIES_PAGESIZE;
+            }
+            var filerCities = await _cityInfoRepository.SearchQueryForCitiesAsync(name, searchQuery,pageNumber, pageSize);
             var result = _mapper.Map<IEnumerable<CityWithoutPointOfInterestDto>>(filerCities);
             return Ok(filerCities);
         }

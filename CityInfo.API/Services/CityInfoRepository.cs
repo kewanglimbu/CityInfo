@@ -24,13 +24,8 @@ namespace CityInfo.API.Services
             return await _dbContext.Cities.Where(c => c.Name == name).OrderBy(c => c.Name).ToListAsync();
         }
 
-        public async Task<IEnumerable<City>> SearchQueryForCitiesAsync(string? name, string? searchQuery)
+        public async Task<IEnumerable<City>> SearchQueryForCitiesAsync(string? name, string? searchQuery, int pageNumber, int pageSize)
         {
-            if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(searchQuery))
-            {
-                return await GetAllCitiesAsync();
-            }
-
             var citiesCollection = _dbContext.Cities as IQueryable<City>;
             if (!string.IsNullOrWhiteSpace(name))
             {
@@ -42,7 +37,7 @@ namespace CityInfo.API.Services
                 searchQuery = searchQuery.Trim();
                 citiesCollection = citiesCollection.Where(c => c.Name.Contains(searchQuery) || (c.Description != null && c.Description.Contains(searchQuery)));
             }
-            return await citiesCollection.OrderBy(c => c.Name).ToListAsync();
+            return await citiesCollection.OrderBy(c => c.Name).Skip( pageSize * (pageNumber - 1)).Take(pageSize).ToListAsync();
         }
 
         public async Task<City?> GetCityAsync(int cityId, bool includePointOfInterest)
