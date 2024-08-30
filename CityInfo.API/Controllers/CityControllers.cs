@@ -2,6 +2,7 @@
 using CityInfo.API.Models;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace CityInfo.API.Controllers
 {
@@ -58,8 +59,13 @@ namespace CityInfo.API.Controllers
             {
                 pageSize = MAX_CITIES_PAGESIZE;
             }
-            var filerCities = await _cityInfoRepository.SearchQueryForCitiesAsync(name, searchQuery,pageNumber, pageSize);
+
+            var (filerCities, paginationMetadata) = await _cityInfoRepository.SearchQueryForCitiesAsync(name, searchQuery,pageNumber, pageSize);
+           
+            Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
             var result = _mapper.Map<IEnumerable<CityWithoutPointOfInterestDto>>(filerCities);
+
             return Ok(filerCities);
         }
 
